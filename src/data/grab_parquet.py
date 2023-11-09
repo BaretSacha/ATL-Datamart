@@ -9,8 +9,7 @@ import requests
 
 
 def main():
-    grab_data()
-    
+    grab_last_data_dispo()
 
 def grab_data() -> None:
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -60,7 +59,98 @@ def grab_data() -> None:
         print(f"Échec du chargement de la page. Code d'état : {response.status_code}")
 
 
-def grab_last_data() -> None:
+def grab_last_data_from_last_month() -> None:
+    url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
+
+    current_year = datetime.now().year
+    last_month = datetime.now().month - 1 if datetime.now().month > 1 else 12
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        links = soup.find_all('a', string="Yellow Taxi Trip Records")
+
+        # Télécharger le fichier du dernier mois complet de l'année en cours
+        file_downloaded = False
+        for link in links:
+            file_url = link['href']
+            file_name = file_url.split("/")[-1]
+            if f"{current_year}-{str(last_month).zfill(2)}" in file_name:
+                file_path = f'../../data/raw/{file_name}'
+                file_response = requests.get(file_url)
+                if file_response.status_code == 200:
+                    with open(file_path, 'wb') as file:
+                        file.write(file_response.content)
+                    print(
+                        f"Le fichier {file_name} a été téléchargé avec succès pour {current_year}-{str(last_month).zfill(2)}.")
+                    file_downloaded = True
+                    break  # Sortir de la boucle après le téléchargement réussi
+                else:
+                    print(f"Échec du téléchargement du fichier {file_name}. Code d'état : {file_response.status_code}")
+
+        if not file_downloaded:
+            print(f"Aucun fichier trouvé pour {current_year}-{str(last_month).zfill(2)}.")
+
+    else:
+        print(f"Échec du chargement de la page. Code d'état : {response.status_code}")
+
+
+
+
+def grab_last_data_dispo() -> None:
+    # URL de la page contenant les liens de téléchargement
+    url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
+
+    # Obtenir l'année en cours
+    current_year = datetime.now().year
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Trouver tous les liens avec le texte "Yellow Taxi Trip Records"
+        links = soup.find_all('a', string="Yellow Taxi Trip Records")
+
+        # Inverser l'ordre des liens pour commencer par le plus récent
+        links = reversed(links)
+
+        # Parcourir les liens pour trouver le dernier fichier de l'année en cours
+        file_downloaded = False
+        for link in links:
+            file_url = link['href']
+            file_name = file_url.split("/")[-1]
+
+            # Vérifier si le fichier correspond à l'année en cours
+            if str(current_year) in file_name:
+                file_path = f'../../data/raw/{file_name}'
+                file_response = requests.get(file_url)
+                if file_response.status_code == 200:
+                    with open(file_path, 'wb') as file:
+                        file.write(file_response.content)
+                    # Extraction de la date du nom du fichier pour affichage
+                    date_str = file_name.split('_')[-1].split('.')[0]
+                    print(
+                        f"Le fichier {file_name} correspondant à {date_str} a été téléchargé avec succès car c'est le dernier mois disponible de l'année {current_year} présent sur le site.")
+                    file_downloaded = True
+                    break  # Sortir de la boucle après le téléchargement réussi
+                else:
+                    print(f"Échec du téléchargement du fichier {file_name}. Code d'état : {file_response.status_code}")
+
+        if not file_downloaded:
+            print(f"Aucun fichier trouvé pour l'année {current_year}.")
+
+    else:
+        print(f"Échec du chargement de la page. Code d'état : {response.status_code}")
+
+
+
+
+
+
+
 
 
 
