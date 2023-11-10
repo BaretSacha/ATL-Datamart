@@ -6,10 +6,11 @@ import pandas as pd
 import sys
 from bs4 import BeautifulSoup
 import requests
+import os
 
 
 def main():
-    grab_last_data_dispo()
+    test()
 
 def grab_data() -> None:
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -96,9 +97,6 @@ def grab_last_data_from_last_month() -> None:
     else:
         print(f"Échec du chargement de la page. Code d'état : {response.status_code}")
 
-
-
-
 def grab_last_data_dispo() -> None:
     # URL de la page contenant les liens de téléchargement
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -148,10 +146,27 @@ def grab_last_data_dispo() -> None:
 
 
 
+def updateCSV() -> None:
+    # Chemin vers le répertoire contenant les fichiers Parquet
+    repertoire_parquet = '../../data/raw'
 
+    # Liste des fichiers Parquet dans le répertoire
+    fichiers_parquet = [f for f in os.listdir(repertoire_parquet) if f.endswith('.parquet')]
 
+    # Boucle pour convertir chaque fichier Parquet en CSV
+    for fichier_parquet in fichiers_parquet:
+        chemin_parquet = os.path.join(repertoire_parquet, fichier_parquet)
 
+        # Charger le fichier Parquet
+        df = pd.read_parquet(chemin_parquet)
 
+        # Construire le chemin pour le fichier CSV
+        chemin_csv = os.path.splitext(chemin_parquet)[0] + '.csv'
+
+        # Convertir le DataFrame en fichier CSV
+        df.to_csv(chemin_csv, index=False)
+
+        print(f'Conversion terminée : {fichier_parquet} -> {chemin_csv}')
 
 
 def write_data_minio():
