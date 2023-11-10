@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from minio import Minio
-import urllib.request
 import pandas as pd
 import sys
 from bs4 import BeautifulSoup
@@ -10,7 +9,7 @@ import os
 
 
 def main():
-    test()
+    deleteParquet()
 
 def grab_data() -> None:
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -167,6 +166,25 @@ def updateCSV() -> None:
         df.to_csv(chemin_csv, index=False)
 
         print(f'Conversion terminée : {fichier_parquet} -> {chemin_csv}')
+
+
+def deleteParquet() -> None:
+    # Chemin vers le répertoire contenant les fichiers Parquet
+    repertoire_parquet = '../../data/raw'
+
+    # Liste des fichiers Parquet dans le répertoire
+    fichiers_parquet = [f for f in os.listdir(repertoire_parquet) if f.endswith('.parquet')]
+
+    # Boucle pour supprimer chaque fichier Parquet
+    for fichier_parquet in fichiers_parquet:
+        chemin_parquet = os.path.join(repertoire_parquet, fichier_parquet)
+
+        # Supprimer le fichier Parquet
+        os.remove(chemin_parquet)
+
+        print(f'Suppression terminée : {fichier_parquet}')
+
+
 
 
 def write_data_minio():
