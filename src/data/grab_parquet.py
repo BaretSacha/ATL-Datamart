@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from minio import Minio
+# from minio import Minio
 import urllib.request
 import pandas as pd
 import sys
@@ -8,9 +8,14 @@ from bs4 import BeautifulSoup
 import requests
 import os
 
+# Get the absolute path of the current script
+current_script_path = os.path.abspath(__file__)
+
+# Set the root path by joining the script path with the project directory
+root_path = os.path.abspath(os.path.join(current_script_path, "..", "..", ".."))
 
 def main():
-    test()
+    updateCSV()
 
 def grab_data() -> None:
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -38,7 +43,7 @@ def grab_data() -> None:
                 end_date = datetime(2023, 8, 31)
 
                 if start_date <= file_date <= end_date:
-                    file_path = f'../../data/raw/{file_name}'
+                    file_path = f'{root_path}/data/raw/{file_name}'
 
                     # Télécharger le fichier
                     file_response = requests.get(file_url)
@@ -79,7 +84,7 @@ def grab_last_data_from_last_month() -> None:
             file_url = link['href']
             file_name = file_url.split("/")[-1]
             if f"{current_year}-{str(last_month).zfill(2)}" in file_name:
-                file_path = f'../../data/raw/{file_name}'
+                file_path = f'{root_path}/data/raw/{file_name}'
                 file_response = requests.get(file_url)
                 if file_response.status_code == 200:
                     with open(file_path, 'wb') as file:
@@ -123,7 +128,7 @@ def grab_last_data_dispo() -> None:
 
             # Vérifier si le fichier correspond à l'année en cours
             if str(current_year) in file_name:
-                file_path = f'../../data/raw/{file_name}'
+                file_path = f'{root_path}/data/raw/{file_name}'
                 file_response = requests.get(file_url)
                 if file_response.status_code == 200:
                     with open(file_path, 'wb') as file:
@@ -148,7 +153,10 @@ def grab_last_data_dispo() -> None:
 
 def updateCSV() -> None:
     # Chemin vers le répertoire contenant les fichiers Parquet
-    repertoire_parquet = '../../data/raw'
+    repertoire_parquet = f'{root_path}/data/raw'
+    
+    # print(current_script_path)
+    # print(__file__)
 
     # Liste des fichiers Parquet dans le répertoire
     fichiers_parquet = [f for f in os.listdir(repertoire_parquet) if f.endswith('.parquet')]
@@ -169,23 +177,23 @@ def updateCSV() -> None:
         print(f'Conversion terminée : {fichier_parquet} -> {chemin_csv}')
 
 
-def write_data_minio():
-    """
-    This method put all Parquet files into Minio
-    Ne pas faire cette méthode pour le moment
-    """
-    client = Minio(
-        "localhost:9000",
-        secure=False,
-        access_key="minio",
-        secret_key="minio123"
-    )
-    bucket: str = "NOM_DU_BUCKET_ICI"
-    found = client.bucket_exists(bucket)
-    if not found:
-        client.make_bucket(bucket)
-    else:
-        print("Bucket " + bucket + " existe déjà")
+# def write_data_minio():
+#     """
+#     This method put all Parquet files into Minio
+#     Ne pas faire cette méthode pour le moment
+#     """
+#     client = Minio(
+#         "localhost:9000",
+#         secure=False,
+#         access_key="minio",
+#         secret_key="minio123"
+#     )
+#     bucket: str = "NOM_DU_BUCKET_ICI"
+#     found = client.bucket_exists(bucket)
+#     if not found:
+#         client.make_bucket(bucket)
+#     else:
+#         print("Bucket " + bucket + " existe déjà")
 
 if __name__ == '__main__':
     sys.exit(main())
