@@ -9,7 +9,7 @@ import os
 
 
 def main():
-    deleteParquet()
+    updateCSV()
 
 def grab_data() -> None:
     url = "https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -33,7 +33,7 @@ def grab_data() -> None:
                 file_date = datetime.strptime(date_str, '%Y-%m')
 
                 # Définir la plage de dates
-                start_date = datetime(2018, 1, 1)
+                start_date = datetime(2023, 1, 1)
                 end_date = datetime(2023, 8, 31)
 
                 if start_date <= file_date <= end_date:
@@ -147,7 +147,7 @@ def grab_last_data_dispo() -> None:
 
 def updateCSV() -> None:
     # Chemin vers le répertoire contenant les fichiers Parquet
-    repertoire_parquet = '../../data/raw'
+    repertoire_parquet = '../../data/rawcsv'
 
     # Liste des fichiers Parquet dans le répertoire
     fichiers_parquet = [f for f in os.listdir(repertoire_parquet) if f.endswith('.parquet')]
@@ -166,6 +166,8 @@ def updateCSV() -> None:
         df.to_csv(chemin_csv, index=False)
 
         print(f'Conversion terminée : {fichier_parquet} -> {chemin_csv}')
+
+
 
 
 def deleteParquet() -> None:

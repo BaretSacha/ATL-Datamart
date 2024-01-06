@@ -27,6 +27,10 @@ def write_data_postgres(dataframe: pd.DataFrame) -> bool:
         "dbms_table": "nyc_raw"
     }
 
+
+
+
+
     db_config["database_url"] = (
         f"{db_config['dbms_engine']}://{db_config['dbms_username']}:{db_config['dbms_password']}@"
         f"{db_config['dbms_ip']}:{db_config['dbms_port']}/{db_config['dbms_database']}"
